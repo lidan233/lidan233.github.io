@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zn"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>Lidan的技术小窝</title><meta name="author" content="Lidan"><link rel="shortcut icon" href="/img/favicon.png"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><meta name="generator" content="Hexo 5.2.0"></head><body><header id="page_header"><div class="header_wrap"><div id="blog_name"><a class="blog_title" id="site-name" href="/">Lidan的技术小窝</a></div><button class="menus_icon"><div class="navicon"></div></button><ul class="menus_items"><li class="menus_item"><a class="site-page" href="/#Publications"> Publications</a></li><li class="menus_item"><a class="site-page" href="/"> About</a></li><li class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://crazyweirdo.xyz"> Blog</a></li></ul></div></header><main id="page_main"><div class="side-card sticky"><div class="card-wrap" itemscope itemtype="http://schema.org/Person"><div class="author-avatar"><img class="avatar-img" src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/profile.png'" alt="avatar"></div><div class="author-discrip"><h3>Lidan</h3><p class="author-bio">Your biography can be writed down here.</p></div><div class="author-links"><button class="btn m-social-links">Links</button><ul class="social-icons"><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-twitter" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-facebook-square" aria-hidden="true"></i></a></li><li><a class="social-icon" href="github.com/lidan233" target="_blank"><i class="fab fa-github" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-weibo" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-weixin" aria-hidden="true"></i></a></li><li><a class="social-icon" href="3235488378" target="_blank"><i class="fab fa-qq" aria-hidden="true"></i></a></li><li><a class="social-icon" href="yuanli@zju.edu.cn" target="_blank"><i class="fas fa-envelope" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fas fa-rss" aria-hidden="true"></i></a></li></ul><ul class="social-links"><li><a class="e-social-link" href="/" target="_blank"><i class="fas fa-graduation-cap" aria-hidden="true"></i><span>Google Scholar</span></a></li><li><a class="e-social-link" href="/" target="_blank"><i class="fab fa-orcid" aria-hidden="true"></i><span>ORCID</span></a></li></ul></div><a class="cv-links" href="/attaches/CV.pdf" target="_blank"><i class="fas fa-file-pdf" aria-hidden="true"><span>My Detail CV.</span></i></a></div></div><div class="page" itemscope itemtype="http://schema.org/CreativeWork"><h2 class="page-title"></h2><article><h1 id="swc数据结构和boxpen碰撞检测"><a href="#swc数据结构和boxpen碰撞检测" class="headerlink" title="swc数据结构和boxpen碰撞检测"></a>swc数据结构和boxpen碰撞检测</h1><h2 id="问题简述"><a href="#问题简述" class="headerlink" title="问题简述"></a>问题简述</h2><p>swc数据就是一个节点一个球，两个节点之间是一个圆台，圆台的两个面就是<br>两个节点所对应半径的半球。而体数据就是一个box。要判定二者是否相交。</p>
+<h2 id="问题规约"><a href="#问题规约" class="headerlink" title="问题规约"></a>问题规约</h2><p>问题可以规约为一个圆台和两个半球，同一个box之间的求交问题。进一步的，问题可以规约为2个圆锥和2个球同一个box之间的求交问题。之所以这样规约是因为最基础的判定相交的代价很低。 </p>
+<h2 id="问题核心（圆锥和box相交）"><a href="#问题核心（圆锥和box相交）" class="headerlink" title="问题核心（圆锥和box相交）"></a>问题核心（圆锥和box相交）</h2><p>首先我想到了vtk，但是事实上vtk无法做到这一点。 </p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://vtk.1045678.n5.nabble.com/collision-detection-with-vtk-td5722845.html#a5722985">http://vtk.1045678.n5.nabble.com/collision-detection-with-vtk-td5722845.html#a5722985</a></p>
+</blockquote>
+<p>This is my Code<br>‘’’C++<br>#include &lt;vtkActor.h&gt;<br>#include &lt;vtkIntersectionPolyDataFilter.h&gt;<br>#include &lt;vtkPolyDataMapper.h&gt;<br>#include &lt;vtkProperty.h&gt;<br>#include &lt;vtkRenderer.h&gt;<br>#include &lt;vtkRenderWindow.h&gt;<br>#include &lt;vtkRenderWindowInteractor.h&gt;<br>#include &lt;vtkSmartPointer.h&gt;<br>#include &lt;vtkSphereSource.h&gt;<br>#include &lt;vtkConeSource.h&gt;<br>#include &lt;vtkCubeSource.h&gt;</p>
+<p>int main(int, char *[])<br>{<br>    vtkSmartPointer<vtkConeSource> coneSource1 = vtkSmartPointer<vtkConeSource>::New() ;<br>//    coneSource1-&gt;SetRadius(5) ;<br>    coneSource1-&gt;SetCenter(0.5,0.5,0.5) ;<br>//    coneSource1-&gt;SetDirection(1,2,3);<br>//    coneSource1-&gt;SetHeight(10) ;<br>//    coneSource1-&gt;SetResolution(1000) ;</p>
+<pre><code>vtkSmartPointer&lt;vtkPolyDataMapper&gt; coneMapper = vtkSmartPointer&lt;vtkPolyDataMapper&gt;::New();
+coneMapper-&gt;SetInputConnection( coneSource1-&gt;GetOutputPort() );
+coneMapper-&gt;ScalarVisibilityOff();
+
+vtkSmartPointer&lt;vtkActor&gt; coneActor = vtkSmartPointer&lt;vtkActor&gt;::New();
+coneActor-&gt;SetMapper( coneMapper );
+coneActor-&gt;GetProperty()-&gt;SetColor(1,0,0);
+
+
+vtkSmartPointer&lt;vtkCubeSource&gt; cubeSource1 = vtkSmartPointer&lt;vtkCubeSource&gt;::New() ;</code></pre>
+<p>//    cubeSource1-&gt;SetCenter(5,5,5) ;<br>//    cubeSource1-&gt;SetBounds(0,10,0,10,0,10) ;</p>
+<pre><code>vtkSmartPointer&lt;vtkPolyDataMapper&gt; cube = vtkSmartPointer&lt;vtkPolyDataMapper&gt;::New();
+cube-&gt;SetInputConnection( cubeSource1-&gt;GetOutputPort() );
+cube-&gt;ScalarVisibilityOff();
+
+vtkSmartPointer&lt;vtkActor&gt; cubeActor = vtkSmartPointer&lt;vtkActor&gt;::New();
+cubeActor-&gt;SetMapper( cube );
+cubeActor-&gt;GetProperty()-&gt;SetColor(0,1,0);</code></pre>
+<p>//    vtkSmartPointer<vtkSphereSource> sphereSource1 = vtkSmartPointer<vtkSphereSource>::New();<br>//    sphereSource1-&gt;SetCenter(0.0, 0.0, 0.0);<br>//    sphereSource1-&gt;SetRadius(2.0f);<br>//    sphereSource1-&gt;Update();</p>
+<pre><code>vtkSmartPointer&lt;vtkIntersectionPolyDataFilter&gt; intersectionPolyDataFilter =
+        vtkSmartPointer&lt;vtkIntersectionPolyDataFilter&gt;::New();
+intersectionPolyDataFilter-&gt;SetInputConnection( 0, coneSource1-&gt;GetOutputPort() );
+intersectionPolyDataFilter-&gt;SetInputConnection( 1, cubeSource1-&gt;GetOutputPort() );
+intersectionPolyDataFilter-&gt;Update();
+
+vtkSmartPointer&lt;vtkPolyDataMapper&gt; intersectionMapper = vtkSmartPointer&lt;vtkPolyDataMapper&gt;::New();
+intersectionMapper-&gt;SetInputConnection( intersectionPolyDataFilter-&gt;GetOutputPort() );
+intersectionMapper-&gt;ScalarVisibilityOff();
+
+
+vtkSmartPointer&lt;vtkActor&gt; intersectionActor = vtkSmartPointer&lt;vtkActor&gt;::New();
+intersectionActor-&gt;SetMapper( intersectionMapper );
+intersectionActor-&gt;GetProperty()-&gt;SetColor(0,0,1);
+
+vtkSmartPointer&lt;vtkRenderer&gt; renderer = vtkSmartPointer&lt;vtkRenderer&gt;::New();
+renderer-&gt;AddViewProp(cubeActor);
+renderer-&gt;AddViewProp(coneActor);
+renderer-&gt;AddViewProp(intersectionActor);
+
+vtkSmartPointer&lt;vtkRenderWindow&gt; renderWindow = vtkSmartPointer&lt;vtkRenderWindow&gt;::New();
+renderWindow-&gt;AddRenderer( renderer );
+
+vtkSmartPointer&lt;vtkRenderWindowInteractor&gt; renWinInteractor =
+        vtkSmartPointer&lt;vtkRenderWindowInteractor&gt;::New();
+renWinInteractor-&gt;SetRenderWindow( renderWindow );
+
+renderWindow-&gt;Render();
+renWinInteractor-&gt;Start();
+
+return EXIT_SUCCESS;</code></pre>
+<p>}<br>‘’’</p>
+<p>这段代码会出现以下问题：</p>
+<blockquote>
+<p>vtkPointLocator (0x7f917de07a60): No points to subdivide<br>No Intersection between objects<br>即使物体之间相交，但是还是没有办法判定。听说vtkCollisionDetectionFilter可以，但是我看了它的代码是基于点作的碰撞检测，这代价太多，而且不是严格的，很可能导致意外。</p>
+</blockquote>
+<h2 id="学长之前的思路"><a href="#学长之前的思路" class="headerlink" title="学长之前的思路"></a>学长之前的思路</h2><p>学长之前的思路类似于metaball，而且不支持分块，所以没办法作长方体和圆台的快速相交判定。学长的思路是每隔一个step，找一个球心，根据这个球生成体数据，step取得足够小，那么体数据就会足够接近圆台，只需要mesh平滑就可以了。</p>
+<h2 id="我的思路"><a href="#我的思路" class="headerlink" title="我的思路"></a>我的思路</h2><p>1.如果这个任务是一个时间短的任务，那么我们直接也是step，每一个小球和box求交，记录下需要marchingcube的体数据的块。<br>2.如果这个任务是一个时间长的任务，我已经写了部分代码，是圆台和box求交的算法。</p>
+<p>我尝试了思路2，但是计算的鲁棒性不能得到保证，因此，我暂时放弃。如果思路1的效率不能满足，那么我将会尝试思路2.</p>
+<h2 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h2><ol>
+<li>整体的体数据加一个padding。 </li>
+<li>然后基于这个padding之后的体数据进行划分，stride为126，size为128，这样每个块的左右都重合了2个pad，建立所有的box</li>
+<li>然后基于box建立BVH。</li>
+<li>根据step圆球，去和BVH求交，找到所需要的box，转化为box坐标，更新体数据</li>
+<li>然后marchingcube，更改marching cube算法。</li>
+</ol>
+</article></div></main><div class="nav-wrap"><div class="nav"><button class="site-nav"><div class="navicon"></div></button><ul class="nav_items"><li class="nav_item"><a class="nav-page" href="/#Publications"> Publications</a></li><li class="nav_item"><a class="nav-page" href="/"> About</a></li><li class="nav_item"><a class="nav-page" target="_blank" rel="noopener" href="https://crazyweirdo.xyz"> Blog</a></li></ul></div><div class="cd-top"><i class="fa fa-arrow-up" aria-hidden="true"></i></div></div><footer id="page_footer"><div class="footer_wrap"><div class="copyright">&copy;2020 - 2021 by Lidan</div><div class="theme-info">Powered by <a target="_blank" href="https://hexo.io" rel="nofollow noopener">Hexo</a> & <a target="_blank" href="https://github.com/PhosphorW/hexo-theme-academia" rel="nofollow noopener">Academia Theme</a></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery-pjax@latest/jquery.pjax.min.js"></script><script src="/js/main.js"></script></body></html>

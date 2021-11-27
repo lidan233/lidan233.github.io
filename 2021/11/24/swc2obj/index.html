@@ -1,0 +1,74 @@
+<!DOCTYPE html><html lang="zn"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5"><title>Lidan的技术小窝</title><meta name="author" content="Lidan"><link rel="shortcut icon" href="/img/favicon.png"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.13.0/css/all.min.css"><meta name="generator" content="Hexo 5.2.0"></head><body><header id="page_header"><div class="header_wrap"><div id="blog_name"><a class="blog_title" id="site-name" href="/">Lidan的技术小窝</a></div><button class="menus_icon"><div class="navicon"></div></button><ul class="menus_items"><li class="menus_item"><a class="site-page" href="/#Publications"> Publications</a></li><li class="menus_item"><a class="site-page" href="/"> About</a></li><li class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://crazyweirdo.xyz"> Blog</a></li></ul></div></header><main id="page_main"><div class="side-card sticky"><div class="card-wrap" itemscope itemtype="http://schema.org/Person"><div class="author-avatar"><img class="avatar-img" src="/img/avatar.jpg" onerror="this.onerror=null;this.src='/img/profile.png'" alt="avatar"></div><div class="author-discrip"><h3>Lidan</h3><p class="author-bio">Your biography can be writed down here.</p></div><div class="author-links"><button class="btn m-social-links">Links</button><ul class="social-icons"><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-twitter" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-facebook-square" aria-hidden="true"></i></a></li><li><a class="social-icon" href="github.com/lidan233" target="_blank"><i class="fab fa-github" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-stack-overflow" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-linkedin" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-weibo" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fab fa-weixin" aria-hidden="true"></i></a></li><li><a class="social-icon" href="3235488378" target="_blank"><i class="fab fa-qq" aria-hidden="true"></i></a></li><li><a class="social-icon" href="yuanli@zju.edu.cn" target="_blank"><i class="fas fa-envelope" aria-hidden="true"></i></a></li><li><a class="social-icon" href="/" target="_blank"><i class="fas fa-rss" aria-hidden="true"></i></a></li></ul><ul class="social-links"><li><a class="e-social-link" href="/" target="_blank"><i class="fas fa-graduation-cap" aria-hidden="true"></i><span>Google Scholar</span></a></li><li><a class="e-social-link" href="/" target="_blank"><i class="fab fa-orcid" aria-hidden="true"></i><span>ORCID</span></a></li></ul></div><a class="cv-links" href="/attaches/CV.pdf" target="_blank"><i class="fas fa-file-pdf" aria-hidden="true"><span>My Detail CV.</span></i></a></div></div><div class="page" itemscope itemtype="http://schema.org/CreativeWork"><h2 class="page-title">swc2obj-- 报告总结及展望</h2><article><h2 id="关于技术保证"><a href="#关于技术保证" class="headerlink" title="关于技术保证"></a>关于技术保证</h2><ul>
+<li>无论是从视觉效果还是从mesh显示均看不出拼接结果。 <blockquote>
+<p>证明1: mesh 显示结果（可由第三方人工检查）<br><img src="/images/b88548851cf2a2abc1dc345a0d05d3def572e48a0a5ea95010b68b34ffc4ae14.png" alt="picture 1"><br>证明2: 参见我主机的80端口</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="关于padding"><a href="#关于padding" class="headerlink" title="关于padding"></a>关于padding</h2><ul>
+<li><ol>
+<li>需要生成等值面，而且是较为平滑的等值面，所以，必须首先对体数据进行卷积，那么这个过程中卷积n次，每个维度加2*n个padding,这个padding参与计算，但最终截断不要。</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>不能断，众所周知，marching cube面的生成，至少需要2层8个体数据，如果说，体数据的分块仅仅重合一层，那么负责人的讲，这一层会不会导致歧义（理论上不会），但这个marching cube不是我写的，我不了解其内部细节。而我发现，如果仅仅重合一层，还是会断裂（一半连上了，一半没连上）,所以我选择重合2层，达到了老师要求的视觉结果。 </li>
+</ol>
+</li>
+</ul>
+<h2 id="最终结果隐患"><a href="#最终结果隐患" class="headerlink" title="最终结果隐患"></a>最终结果隐患</h2><ol>
+<li>非流行非严格水密：由于我重合了2层,所以三角形的数目会更多,在交界处多了一倍，所以这不是一个流形，目前很多软件检测结果都是非流形，meshlab不支持非流形的水密性检测。所以老师是否要求非常硬的就是要一个水密性检测的结果，这样我会想办法去除重复三角形。</li>
+<li>缺少技术: 从胞体出发，很快就会收敛到0.37左右,如果强制不能增加半径，这样的话就可能导致后面obj无法支持医学用途，因为不再精准。</li>
+</ol>
+<h2 id="代码过程总结"><a href="#代码过程总结" class="headerlink" title="代码过程总结"></a>代码过程总结</h2><h3 id="swc2vol-读swc文件转化为分块体数据"><a href="#swc2vol-读swc文件转化为分块体数据" class="headerlink" title="swc2vol:读swc文件转化为分块体数据"></a>swc2vol:读swc文件转化为分块体数据</h3><ul>
+<li>主要做三件事。1. radius为0的swc根据前后两个不为0的radius进行赋值 2.从胞体开始向外增大的改为不变。 3. 分块体数据转换并保存。 </li>
+</ul>
+<blockquote>
+<p>对应cmake中的SWC2obj对象，命令行调用方式如下所示：</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">范式：</span><br><span class="line">SWC2Obj.exe -s the_path_to_swc_file -o the_path_to_save_vol_data -b block_size</span><br><span class="line">示例:</span><br><span class="line">C:/Users/lidan/Desktop/SWC2Obj/cmake-build-release/SWC2Obj.exe -s C:/Users/lidan/Desktop/brain/<span class="number">14193</span>_30neurons/N001.swc -o C:/Users/lidan/Desktop/SWC2Obj/newResult/ -b <span class="number">256</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="marchingcube-读取多个分块体数据marching-cube并拼接为一个obj"><a href="#marchingcube-读取多个分块体数据marching-cube并拼接为一个obj" class="headerlink" title="marchingcube:读取多个分块体数据marching cube并拼接为一个obj"></a>marchingcube:读取多个分块体数据marching cube并拼接为一个obj</h3><blockquote>
+<p>环境说明：因为何博说cuda marchingcube对分块marchingcube的不支持, 所以建议我基于paraview二次开发出python脚本，并使用paraview封装的python解释器进行执行。我从善如流。我将paraview封装的解释器直接重命名为python4,希望paraview可以帮助到大家。</p>
+</blockquote>
+<blockquote>
+<p>对应python脚本为vol2obj, 命令行调用方式如下所示：</p>
+</blockquote>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">范式:</span><br><span class="line">python4.obj volume2obj/main.py -i the_path_to_save_vol_data -o the_path_to_save_obj </span><br><span class="line">示例：</span><br><span class="line"><span class="string">&quot;D:/software/ParaView 5.8.1-Windows-Python3.7-msvc2015-64bit/bin/python4.exe&quot;</span> C:/Users/lidan/PycharmProjects/volume2obj/main.py -i C:/Users/lidan/Desktop/SWC2Obj/newResult/N001.swc -o C:/Users/lidan/Desktop/SWC2Obj/newResult/N001_use.obj </span><br></pre></td></tr></table></figure>
+
+<h3 id="mergeOBJ-读取obj-去重，合并相同节点，实现space坐标映射等。"><a href="#mergeOBJ-读取obj-去重，合并相同节点，实现space坐标映射等。" class="headerlink" title="mergeOBJ:读取obj,去重，合并相同节点，实现space坐标映射等。"></a>mergeOBJ:读取obj,去重，合并相同节点，实现space坐标映射等。</h3><blockquote>
+<p>只合并了相同的节点，所以某一个三角形可能会出现两次。<br>现实中，每个体素对应的并不是一个正方形，而是一个长方形，因此我们在该代码中使用space(0.32,0.32,2)进行坐标映射。<br>针对坐标映射，我们考虑几种情况:</p>
+<ul>
+<li><ol>
+<li>直接在体数据就开始坐标映射，发现会导致体数据marching cube的点的精度问题，导致偏移。 </li>
+</ol>
+</li>
+<li><ol start="2">
+<li>在最后除以space，然后加offset，和swc转成的线obj关系吻合最好（目前采用）</li>
+</ol>
+</li>
+<li><ol start="3">
+<li>最后处理坐标映射（开放问题） </li>
+</ol>
+</li>
+</ul>
+</blockquote>
+<p>对应cmake对象为mergeOBJ, 命令行调用方式如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">范式：</span><br><span class="line">mergeOBJ.exe -i the_path_to_save_obj -o the_path_to_save_obj_without_repeat_vertex</span><br><span class="line">示例：</span><br><span class="line">C:/Users/lidan/Desktop/SWC2Obj/cmake-build-release/ObjMerge/mergeOBJ.exe -i  C:/Users/lidan/Desktop/SWC2Obj/newResult/N001_use.obj -o C:/Users/lidan/Desktop/SWC2Obj/newResult/N001_new_use.obj</span><br></pre></td></tr></table></figure>
+
+<h3 id="swc2lobj-读取swc，生成线框obj等。"><a href="#swc2lobj-读取swc，生成线框obj等。" class="headerlink" title="swc2lobj:读取swc，生成线框obj等。"></a>swc2lobj:读取swc，生成线框obj等。</h3><blockquote>
+<p>这部分我基本没写，完全把何博代码抄过来，添加cmake即可。 </p>
+</blockquote>
+<p>对应cmake对象为swc2lobj, 命令行调用方式如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">范式：</span><br><span class="line">swc2Lobj.exe -s the_path_to_swc_file -o the_path_to_save_line_obj</span><br><span class="line">示例：</span><br><span class="line">C:\Users\lidan\Desktop\SWC2Obj\cmake-build-release\swc2lobj\swc2Lobj.exe -s C:/Users/lidan/Desktop/brain/<span class="number">14193</span>_30neurons/N030.swc -o C:/Users/lidan/Desktop/brain/N30Line.obj</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="最终命令行拼接"><a href="#最终命令行拼接" class="headerlink" title="最终命令行拼接"></a>最终命令行拼接</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:/Users/lidan/Desktop/SWC2Obj/cmake-build-release/SWC2Obj.exe -s C:/Users/lidan/Desktop/brain/14193_30neurons/N001.swc -o C:/Users/lidan/Desktop/SWC2Obj/newResult/ -b 256 &amp;&amp;&quot;D:/software/ParaView 5.8.1-Windows-Python3.7-msvc2015-64bit/bin/python4.exe&quot; C:/Users/lidan/PycharmProjects/volume2obj/main.py -i C:/Users/lidan/Desktop/SWC2Obj/newResult/N001.swc -o C:/Users/lidan/Desktop/SWC2Obj/newResult/N001_use.obj &amp;&amp;  C:/Users/lidan/Desktop/SWC2Obj/cmake-build-release/ObjMerge/mergeOBJ.exe -i  C:/Users/lidan/Desktop/SWC2Obj/newResult/N001_use.obj -o C:/Users/lidan/Desktop/SWC2Obj/newResult/N001_new_use.obj</span><br></pre></td></tr></table></figure>
+
+<h2 id="平滑"><a href="#平滑" class="headerlink" title="平滑"></a>平滑</h2><p>采用tubuin(经过尝试为最好平滑)，第二个负参数设为-0.1,即可得到经验的最好的平滑值。</p>
+<h2 id="代码未来展望"><a href="#代码未来展望" class="headerlink" title="代码未来展望"></a>代码未来展望</h2><ul>
+<li>将tubuin 平滑集成到我的代码中。</li>
+<li>智能指针的转换尚未完成</li>
+<li>paraview解释器的docker环境还未配置好</li>
+</ul>
+<h2 id="最终结果"><a href="#最终结果" class="headerlink" title="最终结果"></a>最终结果</h2><p>参见10.186.152.213/webgl/</p>
+</article></div></main><div class="nav-wrap"><div class="nav"><button class="site-nav"><div class="navicon"></div></button><ul class="nav_items"><li class="nav_item"><a class="nav-page" href="/#Publications"> Publications</a></li><li class="nav_item"><a class="nav-page" href="/"> About</a></li><li class="nav_item"><a class="nav-page" target="_blank" rel="noopener" href="https://crazyweirdo.xyz"> Blog</a></li></ul></div><div class="cd-top"><i class="fa fa-arrow-up" aria-hidden="true"></i></div></div><footer id="page_footer"><div class="footer_wrap"><div class="copyright">&copy;2020 - 2021 by Lidan</div><div class="theme-info">Powered by <a target="_blank" href="https://hexo.io" rel="nofollow noopener">Hexo</a> & <a target="_blank" href="https://github.com/PhosphorW/hexo-theme-academia" rel="nofollow noopener">Academia Theme</a></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jquery-pjax@latest/jquery.pjax.min.js"></script><script src="/js/main.js"></script></body></html>
